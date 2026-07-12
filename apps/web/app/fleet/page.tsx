@@ -32,6 +32,47 @@ const EMPTY_FORM = {
 
 const EMPTY_VEHICLES: Vehicle[] = [];
 
+type SortKey =
+  | "registrationNumber"
+  | "name"
+  | "type"
+  | "odometer"
+  | "acquisitionCost"
+  | "status";
+type SortDir = "asc" | "desc";
+const NUMERIC_SORT_KEYS: SortKey[] = ["odometer", "acquisitionCost"];
+
+function SortHeader({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey | null;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = activeKey === sortKey;
+  return (
+    <th className="px-4 py-3 font-semibold">
+      <button
+        onClick={() => onSort(sortKey)}
+        className={`flex items-center gap-1 hover:text-neutral-200 transition-colors ${
+          active ? "text-neutral-200" : ""
+        }`}
+      >
+        {label}
+        <span className="text-[10px]">
+          {active ? (dir === "asc" ? "▲" : "▼") : ""}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 export default function FleetPage() {
   const { user } = useAuthStore();
   const { showToast } = useToast();
@@ -41,6 +82,8 @@ export default function FleetPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Vehicle | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -67,6 +110,29 @@ export default function FleetPage() {
     const matchesStatus = statusFilter === "All" || v.status === statusFilter;
     return matchesSearch && matchesType && matchesStatus;
   });
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered;
+    const copy = [...filtered];
+    copy.sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      const cmp = NUMERIC_SORT_KEYS.includes(sortKey)
+        ? Number(aVal) - Number(bVal)
+        : String(aVal).localeCompare(String(bVal));
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return copy;
+  }, [filtered, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: vehicleClient.create,
@@ -214,13 +280,13 @@ export default function FleetPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-neutral-800 text-left text-neutral-500 text-xs uppercase tracking-wider">
-                <th className="px-4 py-3 font-semibold">Reg. No</th>
-                <th className="px-4 py-3 font-semibold">Name / Model</th>
-                <th className="px-4 py-3 font-semibold">Type</th>
+                <SortHeader label="Reg. No" sortKey="registrationNumber" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="Name / Model" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="Type" sortKey="type" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3 font-semibold">Capacity</th>
-                <th className="px-4 py-3 font-semibold">Odometer</th>
-                <th className="px-4 py-3 font-semibold">Cost</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
+                <SortHeader label="Odometer" sortKey="odometer" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="Cost" sortKey="acquisitionCost" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
                 {canManage && <th className="px-4 py-3 font-semibold">Actions</th>}
               </tr>
             </thead>
@@ -239,14 +305,14 @@ export default function FleetPage() {
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError && filtered.length === 0 && (
+              {!isLoading && !isError && sorted.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-neutral-500">
                     No vehicles found. {canManage && "Add one to get started."}
                   </td>
                 </tr>
               )}
-              {filtered.map((vehicle) => (
+              {sorted.map((vehicle) => (
                 <tr
                   key={vehicle.id}
                   className="border-b border-neutral-800/60 last:border-0 hover:bg-neutral-800/30 transition-colors"

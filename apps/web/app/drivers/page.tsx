@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateDriverSchema, UpdateDriverSchema } from "@repo/schemas";
 import { AppShell } from "@/components/layout/app-shell";
@@ -30,6 +30,46 @@ const EMPTY_FORM = {
 
 const isExpired = (dateStr: string) => new Date(dateStr).getTime() < Date.now();
 
+type SortKey =
+  | "name"
+  | "licenseNumber"
+  | "licenseExpiryDate"
+  | "safetyScore"
+  | "status";
+type SortDir = "asc" | "desc";
+const NUMERIC_SORT_KEYS: SortKey[] = ["safetyScore"];
+
+function SortHeader({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey | null;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = activeKey === sortKey;
+  return (
+    <th className="px-4 py-3 font-semibold">
+      <button
+        onClick={() => onSort(sortKey)}
+        className={`flex items-center gap-1 hover:text-neutral-200 transition-colors ${
+          active ? "text-neutral-200" : ""
+        }`}
+      >
+        {label}
+        <span className="text-[10px]">
+          {active ? (dir === "asc" ? "▲" : "▼") : ""}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 export default function DriversPage() {
   const { user } = useAuthStore();
   const { showToast } = useToast();
@@ -37,6 +77,8 @@ export default function DriversPage() {
   const canManage = user?.role === "SAFETY_OFFICER";
 
   const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Driver | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -54,6 +96,29 @@ export default function DriversPage() {
       d.name.toLowerCase().includes(search.toLowerCase()) ||
       d.licenseNumber.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered;
+    const copy = [...filtered];
+    copy.sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      const cmp = NUMERIC_SORT_KEYS.includes(sortKey)
+        ? Number(aVal) - Number(bVal)
+        : String(aVal).localeCompare(String(bVal));
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return copy;
+  }, [filtered, sortKey, sortDir]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: driverClient.create,
@@ -177,13 +242,13 @@ export default function DriversPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-neutral-800 text-left text-neutral-500 text-xs uppercase tracking-wider">
-                <th className="px-4 py-3 font-semibold">Driver Name</th>
-                <th className="px-4 py-3 font-semibold">License No</th>
+                <SortHeader label="Driver Name" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="License No" sortKey="licenseNumber" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3 font-semibold">Category</th>
-                <th className="px-4 py-3 font-semibold">Expiry Date</th>
+                <SortHeader label="Expiry Date" sortKey="licenseExpiryDate" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
                 <th className="px-4 py-3 font-semibold">Contact</th>
-                <th className="px-4 py-3 font-semibold">Safety Score</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
+                <SortHeader label="Safety Score" sortKey="safetyScore" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+                <SortHeader label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
                 {canManage && <th className="px-4 py-3 font-semibold">Actions</th>}
               </tr>
             </thead>
@@ -202,14 +267,14 @@ export default function DriversPage() {
                   </td>
                 </tr>
               )}
-              {!isLoading && !isError && filtered.length === 0 && (
+              {!isLoading && !isError && sorted.length === 0 && (
                 <tr>
                   <td colSpan={8} className="px-4 py-10 text-center text-neutral-500">
                     No drivers found. {canManage && "Add one to get started."}
                   </td>
                 </tr>
               )}
-              {filtered.map((driver) => {
+              {sorted.map((driver) => {
                 const expired = isExpired(driver.licenseExpiryDate);
                 return (
                   <tr

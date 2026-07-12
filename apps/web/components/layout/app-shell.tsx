@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth";
-import { Sidebar } from "./sidebar";
+import { Sidebar, MobileSidebarDrawer } from "./sidebar";
 import { Header } from "./header";
 
 export function AppShell({
@@ -16,6 +16,7 @@ export function AppShell({
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -38,8 +39,12 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-neutral-950 text-neutral-200">
       <Sidebar />
+      <MobileSidebarDrawer
+        open={mobileNavOpen}
+        onClose={() => setMobileNavOpen(false)}
+      />
       <div className="flex-1 min-w-0 flex flex-col">
-        <Header title={title} />
+        <Header title={title} onMenuClick={() => setMobileNavOpen(true)} />
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>

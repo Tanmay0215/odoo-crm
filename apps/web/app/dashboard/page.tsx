@@ -1,8 +1,16 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
-import { dashboardClient, VehicleStatus } from "@/lib/api";
+import {
+  dashboardClient,
+  vehicleClient,
+  driverClient,
+  Vehicle,
+  Driver,
+  VehicleStatus,
+} from "@/lib/api";
 
 const STATUS_BAR_COLORS: Record<VehicleStatus, string> = {
   AVAILABLE: "bg-emerald-500",
@@ -38,16 +46,89 @@ function KpiCard({
   );
 }
 
+const VEHICLE_STATUSES: VehicleStatus[] = [
+  "AVAILABLE",
+  "ON_TRIP",
+  "IN_SHOP",
+  "RETIRED",
+];
+const EMPTY_VEHICLES: Vehicle[] = [];
+const EMPTY_DRIVERS: Driver[] = [];
+
 export default function DashboardPage() {
-  const { data, isLoading, isError } = useQuery({
+  const { isError: summaryError } = useQuery({
     queryKey: ["dashboard-summary"],
     queryFn: () => dashboardClient.summary(),
   });
 
-  const statusCounts = data?.vehicleStatusCounts;
-  const maxCount = statusCounts
-    ? Math.max(1, ...Object.values(statusCounts))
-    : 1;
+  const {
+    data: vehicleData,
+    isLoading: vehiclesLoading,
+    isError: vehiclesError,
+  } = useQuery({
+    queryKey: ["vehicles"],
+    queryFn: () => vehicleClient.list(),
+  });
+
+  const {
+    data: driverData,
+    isLoading: driversLoading,
+    isError: driversError,
+  } = useQuery({
+    queryKey: ["drivers"],
+    queryFn: () => driverClient.list(),
+  });
+
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [regionFilter, setRegionFilter] = useState("All");
+
+  const vehicles = vehicleData?.vehicles ?? EMPTY_VEHICLES;
+  const drivers = driverData?.drivers ?? EMPTY_DRIVERS;
+  const isLoading = vehiclesLoading || driversLoading;
+  const isError = summaryError || vehiclesError || driversError;
+
+  const types = useMemo(
+    () => Array.from(new Set(vehicles.map((v) => v.type))).sort(),
+    [vehicles],
+  );
+  const regions = useMemo(
+    () =>
+      Array.from(new Set(vehicles.map((v) => v.region).filter(Boolean))).sort() as string[],
+    [vehicles],
+  );
+
+  const filteredVehicles = useMemo(
+    () =>
+      vehicles.filter((v) => {
+        const matchesType = typeFilter === "All" || v.type === typeFilter;
+        const matchesStatus = statusFilter === "All" || v.status === statusFilter;
+        const matchesRegion = regionFilter === "All" || v.region === regionFilter;
+        return matchesType && matchesStatus && matchesRegion;
+      }),
+    [vehicles, typeFilter, statusFilter, regionFilter],
+  );
+
+  const fleet = filteredVehicles.filter((v) => v.status !== "RETIRED").length;
+  const availableVehicles = filteredVehicles.filter((v) => v.status === "AVAILABLE").length;
+  const vehiclesInMaintenance = filteredVehicles.filter((v) => v.status === "IN_SHOP").length;
+  const onTrip = filteredVehicles.filter((v) => v.status === "ON_TRIP").length;
+  const fleetUtilization = fleet > 0 ? Math.round((onTrip / fleet) * 100) : 0;
+
+  const driversOnDuty = drivers.filter(
+    (d) => d.status === "AVAILABLE" || d.status === "ON_TRIP",
+  ).length;
+
+  const statusCounts: Record<VehicleStatus, number> = {
+    AVAILABLE: availableVehicles,
+    ON_TRIP: onTrip,
+    IN_SHOP: vehiclesInMaintenance,
+    RETIRED: filteredVehicles.filter((v) => v.status === "RETIRED").length,
+  };
+  const maxCount = Math.max(1, ...Object.values(statusCounts));
+
+  const filtersActive =
+    typeFilter !== "All" || statusFilter !== "All" || regionFilter !== "All";
 
   return (
     <AppShell title="Dashboard">
@@ -57,30 +138,79 @@ export default function DashboardPage() {
         </div>
       )}
 
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-neutral-200"
+        >
+          <option value="All">All Types</option>
+          {types.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-neutral-200"
+        >
+          <option value="All">All Status</option>
+          {VEHICLE_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s.replace("_", " ")}
+            </option>
+          ))}
+        </select>
+        <select
+          value={regionFilter}
+          onChange={(e) => setRegionFilter(e.target.value)}
+          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-neutral-200"
+        >
+          <option value="All">All Regions</option>
+          {regions.map((r) => (
+            <option key={r} value={r}>
+              {r}
+            </option>
+          ))}
+        </select>
+        {filtersActive && (
+          <button
+            onClick={() => {
+              setTypeFilter("All");
+              setStatusFilter("All");
+              setRegionFilter("All");
+            }}
+            className="text-xs font-semibold text-neutral-400 hover:text-neutral-100 transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
         <KpiCard
           label="Fleet"
-          value={isLoading ? "—" : String(data?.fleet ?? 0)}
+          value={isLoading ? "—" : String(fleet)}
           hint="Active vehicles"
         />
         <KpiCard
           label="Available Vehicles"
-          value={isLoading ? "—" : String(data?.availableVehicles ?? 0)}
+          value={isLoading ? "—" : String(availableVehicles)}
         />
         <KpiCard
           label="In Maintenance"
-          value={isLoading ? "—" : String(data?.vehiclesInMaintenance ?? 0)}
+          value={isLoading ? "—" : String(vehiclesInMaintenance)}
         />
         <KpiCard
           label="Drivers on Duty"
-          value={isLoading ? "—" : String(data?.driversOnDuty ?? 0)}
-          hint={
-            isLoading ? undefined : `of ${data?.totalDrivers ?? 0} total`
-          }
+          value={isLoading ? "—" : String(driversOnDuty)}
+          hint={isLoading ? undefined : `of ${drivers.length} total`}
         />
         <KpiCard
           label="Fleet Utilization"
-          value={isLoading ? "—" : `${data?.fleetUtilization ?? 0}%`}
+          value={isLoading ? "—" : `${fleetUtilization}%`}
           hint="Vehicles on trip"
         />
       </div>
