@@ -1,159 +1,134 @@
-# Turborepo starter
+# TransitOps: Smart Transport Operations Platform
 
-This Turborepo starter is maintained by the Turborepo core team.
+### Project Leadership
 
-## Using this example
+- **Mohit Maulekhi** (mohitmaulekhi312@gmail.com)
+- **Tanmay Gupta** (tanmaygupta.0215@gmail.com)
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 1. Executive Summary
+
+TransitOps is a centralized, end-to-end transport operations and fleet asset management platform. It digitizes vehicle registries, driver safety profiles, dispatching, maintenance records, and fuel/expense logs. TransitOps replaces manual spreadsheets with automated business rules, real-time safety compliance locks, and unified operational insights.
+
+---
+
+## 2. Role-Based Access Control (RBAC) Architecture
+
+TransitOps enforces role boundaries both at the client interface level and the REST API layer:
+
+- **Fleet Manager:** Administers fleet assets, edits vehicle records, and opens/closes maintenance logs.
+- **Driver:** Views assigned schedules, dispatches routes, and logs completed odometers and fuel refills.
+- **Safety Officer:** Ensures driver compliance, tracks driving licenses, audits safety scores, and controls suspensions.
+- **Financial Analyst:** Monitors fuel outlays, administrative tolls, maintenance costs, and analyzes vehicle profitability.
+
+---
+
+## 3. Technology Stack & Modern Tooling
+
+TransitOps is structured as a unified monorepo workspace for compilation safety:
+
+### Monorepo Structure
+
+- **Monorepo Orchestration:** Turborepo with dynamic build caching.
+- **Package Manager:** pnpm Workspaces for fast, space-efficient dependency linking.
+
+### Frontend Application (apps/web)
+
+- **Core Framework:** Next.js 16 (React 19 App Router) with Turbopack compilation.
+- **Styling & UI:** Tailwind CSS v4 with a custom, polished Glassmorphism Dark Theme.
+- **State Management:** Zustand for persistent, client-side session and theme configurations.
+- **Asynchronous Queries:** TanStack React Query v5 for fully cached server synchronization.
+
+### Backend Application (apps/api)
+
+- **Server Engine:** Node.js & Express with full TypeScript support.
+- **Session Security:** jsonwebtoken (JWT) token validation with authorization headers.
+- **Database ORM:** Drizzle ORM for type-safe query compilation.
+- **Database Engine:** PostgreSQL database schemas.
+
+### Shared Workspace Packages
+
+- `@repo/schemas`: Universal, shared Zod validation schemas (guaranteeing identical API payload validation on both frontend and backend).
+- `@repo/typescript-config` & `@repo/eslint-config`: Shared workspace rules for strict compiling and ESLint audits.
+
+---
+
+## 4. Key Core Features & Enforced Business Rules
+
+### KPI Dashboard
+
+- Active, available, and in-maintenance vehicle counts, drivers on duty, active dispatches, and live fleet utilization rates.
+- Fully interactive filters to isolate records by Vehicle Type, Status, or Region.
+
+### Vehicle Registry
+
+- Unique registration number indexing checking constraints before saving.
+- Track model specifications, load capacity, odometers, and acquisition costs.
+
+### Driver Safety & Compliance
+
+- Strict validation preventing driver assignment if their license is expired or if their status is set to SUSPENDED.
+- Driver lists feature dynamic visual warnings highlighting expired credentials in real-time.
+
+### Google Maps Integrated Trip Dispatcher
+
+- Google Places Autocomplete for warehouse address inputs.
+- Google Directions API rendering a real-time dark-mode vector map preview, automatically calculating driving distances.
+- Safety limit validations checking cargo weights against vehicle load capacity to block overloaded draft plans.
+- Seamless state management transitions:
+  - **Dispatch:** Moves vehicle and driver to ON_TRIP.
+  - **Cancel:** Restores vehicle and driver back to AVAILABLE.
+  - **Completion:** Solicits final odometers, logs fuel refills, and restores assets back to AVAILABLE.
+
+### Maintenance Management
+
+- Logging a vehicle in maintenance sets its status to IN_SHOP and instantly locks it out from the Trip Dispatcher pool.
+- Single-click closure records to restore the asset back to AVAILABLE.
+
+### Fuel & Administrative Ledger
+
+- Record refuels and generic expenses (Tolls, Registrations, Insurances).
+- Live summaries tracking total operational outlays (fuel + repairs + administrative tolls).
+
+### Reports, Analytics & Dual Exporters
+
+- Dynamic Cost vs. Revenue Side-by-Side Bar Charts.
+- Fuel Mileage plots (km/L) and interactive Vehicle Return on Investment (ROI) Leaderboards.
+- **Dual Exporters:**
+  - **CSV Exporter:** Authenticated data retrieval downloading formatted ledger files.
+  - **PDF Exporter:** Dynamically generates formatted, corporate tabular PDF reports on-the-fly.
+
+---
+
+## 5. Directory Structure & Architecture
+
+```text
+├── apps/
+│   ├── api/             # Express API application (Controllers, Routers, Services)
+│   └── web/             # Next.js frontend application (App Router, Stores, Components)
+├── packages/
+│   ├── schemas/         # Shared Zod validation schemas (unified client-server contracts)
+│   ├── eslint-config/   # Shared code style guidelines
+│   └── typescript-config/# Shared TS compilations configs
+└── pnpm-lock.yaml       # Monorepo lockfile
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 6. Installation & Execution Guidelines
 
-### Apps and Packages
+### Development Mode Setup
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+1. Clone the repository and install dependencies:
+   ```bash
+   pnpm install
+   ```
+2. Build shared schemas and packages:
+   ```bash
+   pnpm run build
+   ```
+3. Execute the development servers (runs web and API concurrently):
+   ```bash
+   pnpm run dev
+   ```
