@@ -389,7 +389,7 @@ export default function FleetPage() {
                     {vehicle.odometer}
                   </td>
                   <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
-                    ${Number(vehicle.acquisitionCost).toLocaleString()}
+                    ₹{Number(vehicle.acquisitionCost).toLocaleString()}
                   </td>
                   <td className="px-5 py-4">
                     <StatusBadge status={vehicle.status} />
@@ -524,7 +524,7 @@ export default function FleetPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Acquisition Cost ($)</Label>
+              <Label>Acquisition Cost (₹)</Label>
               <Input
                 required
                 type="number"

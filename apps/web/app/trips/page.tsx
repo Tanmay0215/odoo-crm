@@ -25,7 +25,7 @@ const EMPTY_FORM = {
   driverId: "",
   cargoWeight: "0",
   plannedDistance: "0",
-  revenue: "150",
+  revenue: "15000",
 };
 
 const EMPTY_COMPLETE_FORM = {
@@ -562,7 +562,7 @@ export default function TripsPage() {
               <FieldError message={errors.driverId} />
             </div>
             <div>
-              <Label>Estimated Revenue ($)</Label>
+              <Label>Estimated Revenue (₹)</Label>
               <Input
                 required
                 type="number"
@@ -687,7 +687,7 @@ export default function TripsPage() {
               <FieldError message={errors.fuelConsumed} />
             </div>
             <div>
-              <Label>Fuel Outlay Cost ($)</Label>
+              <Label>Fuel Outlay Cost (₹)</Label>
               <Input
                 required
                 type="number"

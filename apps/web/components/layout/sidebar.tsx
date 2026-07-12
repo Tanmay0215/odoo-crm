@@ -220,7 +220,6 @@ const NAV_ITEMS = [
     icon: AnalyticsIcon,
   },
   { href: "/chat", label: "Assistant", enabled: true, icon: ChatIcon },
-  { href: "/settings", label: "Settings", enabled: false, icon: SettingsIcon },
 ];
 
 function SidebarItem({

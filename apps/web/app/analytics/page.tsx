@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
 import { financesClient } from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
 
 export default function AnalyticsPage() {
   const {
@@ -14,9 +15,34 @@ export default function AnalyticsPage() {
     queryFn: () => financesClient.getReports(),
   });
 
-  const handleDownloadCSV = () => {
-    // Direct secure browser redirect to trigger our Express attachment download
-    window.location.href = "http://localhost:5000/api/dashboard/reports/csv";
+  const handleDownloadCSV = async () => {
+    try {
+      const token = useAuthStore.getState().token;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      
+      const response = await fetch(`${apiUrl}/dashboard/reports/csv`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to export CSV");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transitops_report.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to download CSV");
+    }
   };
 
   // Cumulative totals
@@ -65,7 +91,7 @@ export default function AnalyticsPage() {
             Cumulative Fleet Revenue
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalRevenue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -77,7 +103,7 @@ export default function AnalyticsPage() {
             Total Operational Outlays
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalCosts.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -96,7 +122,7 @@ export default function AnalyticsPage() {
           <div
             className={`text-2xl font-black mt-2 font-mono ${totalProfitability >= 0 ? "text-emerald-500" : "text-rose-500"}`}
           >
-            $
+            ₹
             {totalProfitability.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -161,7 +187,7 @@ export default function AnalyticsPage() {
                         />
                       </div>
                       <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Rev: ${r.revenue}
+                        Rev: ₹{r.revenue}
                       </span>
                     </div>
                     {/* Operational Cost Bar */}
@@ -173,7 +199,7 @@ export default function AnalyticsPage() {
                         />
                       </div>
                       <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Cost: ${r.totalOperationalCost}
+                        Cost: ₹{r.totalOperationalCost}
                       </span>
                     </div>
                   </div>
@@ -307,13 +333,13 @@ export default function AnalyticsPage() {
                     {r.odometer.toLocaleString()} km
                   </td>
                   <td className="px-5 py-4 text-blue-500 font-extrabold font-mono">
-                    ${r.revenue.toLocaleString()}
+                    ₹{r.revenue.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold font-mono">
-                    ${r.fuelCost.toLocaleString()}
+                    ₹{r.fuelCost.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold font-mono">
-                    ${r.maintenanceCost.toLocaleString()}
+                    ₹{r.maintenanceCost.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <span
