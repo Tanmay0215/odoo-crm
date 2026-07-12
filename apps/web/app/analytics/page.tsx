@@ -1,9 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
 import { financesClient } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 export default function AnalyticsPage() {
   const { user, token } = useAuthStore();
@@ -168,6 +182,11 @@ export default function AnalyticsPage() {
     );
   };
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Cumulative totals
   const totalRevenue = reports.reduce((sum, r) => sum + r.revenue, 0);
   const totalCosts = reports.reduce(
@@ -175,6 +194,30 @@ export default function AnalyticsPage() {
     0,
   );
   const totalProfitability = totalRevenue - totalCosts;
+
+  // Chart data calculations
+  const barChartData = reports.map((r) => ({
+    name: r.registrationNumber,
+    fullName: `${r.name} ${r.model}`,
+    Revenue: Number(r.revenue),
+    Cost: Number(r.totalOperationalCost),
+  }));
+
+  const efficiencyChartData = reports.map((r) => ({
+    name: r.registrationNumber,
+    fullName: `${r.name} ${r.model}`,
+    "Efficiency (km/L)": Number(r.fuelEfficiency),
+  }));
+
+  const totalFuel = reports.reduce((sum, r) => sum + r.fuelCost, 0);
+  const totalMaint = reports.reduce((sum, r) => sum + r.maintenanceCost, 0);
+  const totalExp = reports.reduce((sum, r) => sum + r.generalExpenseCost, 0);
+
+  const expenseBreakdown = [
+    { name: "Fuel Cost", value: totalFuel, color: "#f59e0b" },
+    { name: "Maintenance", value: totalMaint, color: "#ef4444" },
+    { name: "General Fees", value: totalExp, color: "#64748b" },
+  ].filter((item) => item.value > 0);
 
   return (
     <AppShell title="Reports & Analytics">
@@ -277,7 +320,7 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* --- COMPARATIVE COST VS REVENUE BAR GRAPH --- */}
         <div className="glass-panel p-6 space-y-6">
           <div className="space-y-1">
@@ -285,73 +328,36 @@ export default function AnalyticsPage() {
               Costs vs Revenue Profiles
             </h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
-              Side-by-side asset comparison
+              Side-by-side asset comparison (₹)
             </p>
           </div>
 
-          <div className="space-y-4">
-            {isLoading && (
-              <div className="text-center text-xs text-slate-400 font-bold p-8">
-                Loading metrics...
-              </div>
+          <div className="h-[280px] w-full flex items-center justify-center">
+            {!isLoading && !isError && barChartData.length === 0 && (
+              <span className="text-xs text-slate-400 font-bold">No active data to plot</span>
             )}
-            {isError && (
-              <div className="text-center text-xs text-rose-500 font-bold p-8">
-                Failed to compile reports.
-              </div>
+            {isLoading && <span className="text-xs text-slate-400 font-bold">Loading...</span>}
+            {isError && <span className="text-xs text-rose-500 font-bold">Failed to load</span>}
+            {!isLoading && !isError && barChartData.length > 0 && mounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(15, 23, 42, 0.95)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "16px",
+                      color: "#f8fafc",
+                    }}
+                  />
+                  <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 10, fontWeight: "bold" }} />
+                  <Bar dataKey="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Cost" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
-            {!isLoading && !isError && reports.length === 0 && (
-              <div className="text-center text-xs text-slate-400 font-bold p-8">
-                No active data to plot.
-              </div>
-            )}
-            {reports.map((r) => {
-              const maxVal = Math.max(
-                ...reports.map((item) =>
-                  Math.max(item.revenue, item.totalOperationalCost),
-                ),
-                1,
-              );
-              const revWidth = (r.revenue / maxVal) * 100;
-              const costWidth = (r.totalOperationalCost / maxVal) * 100;
-
-              return (
-                <div
-                  key={r.id}
-                  className="space-y-2 border-b border-slate-100/50 dark:border-slate-900/30 pb-4 last:border-0 last:pb-0"
-                >
-                  <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                    {r.name} {r.model} ({r.registrationNumber})
-                  </div>
-                  <div className="space-y-1.5">
-                    {/* Revenue Bar */}
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 bg-slate-50 dark:bg-slate-950 rounded-full flex-1 overflow-hidden border border-slate-100 dark:border-slate-900">
-                        <div
-                          className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                          style={{ width: `${revWidth}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Rev: ₹{r.revenue}
-                      </span>
-                    </div>
-                    {/* Operational Cost Bar */}
-                    <div className="flex items-center gap-3">
-                      <div className="h-2 bg-slate-50 dark:bg-slate-950 rounded-full flex-1 overflow-hidden border border-slate-100 dark:border-slate-900">
-                        <div
-                          className="h-full bg-rose-500 rounded-full transition-all duration-500"
-                          style={{ width: `${costWidth}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Cost: ₹{r.totalOperationalCost}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
 
@@ -366,52 +372,93 @@ export default function AnalyticsPage() {
             </p>
           </div>
 
-          <div className="space-y-4">
-            {isLoading && (
-              <div className="text-center text-xs text-slate-400 font-bold p-8">
-                Loading metrics...
-              </div>
+          <div className="h-[280px] w-full flex items-center justify-center">
+            {!isLoading && !isError && efficiencyChartData.length === 0 && (
+              <span className="text-xs text-slate-400 font-bold">No active data to plot</span>
             )}
-            {isError && (
-              <div className="text-center text-xs text-rose-500 font-bold p-8">
-                Failed to compile reports.
-              </div>
+            {isLoading && <span className="text-xs text-slate-400 font-bold">Loading...</span>}
+            {isError && <span className="text-xs text-rose-500 font-bold">Failed to load</span>}
+            {!isLoading && !isError && efficiencyChartData.length > 0 && mounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={efficiencyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(15, 23, 42, 0.95)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "16px",
+                      color: "#f8fafc",
+                    }}
+                  />
+                  <Bar dataKey="Efficiency (km/L)" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
-            {!isLoading && !isError && reports.length === 0 && (
-              <div className="text-center text-xs text-slate-400 font-bold p-8">
-                No active data to plot.
-              </div>
-            )}
-            {reports.map((r) => {
-              const maxEff = Math.max(
-                ...reports.map((item) => item.fuelEfficiency),
-                1,
-              );
-              const width = (r.fuelEfficiency / maxEff) * 100;
-
-              return (
-                <div
-                  key={r.id}
-                  className="space-y-2 pb-4 border-b border-slate-100/50 dark:border-slate-900/30 last:border-0 last:pb-0"
-                >
-                  <div className="flex justify-between text-xs font-extrabold text-slate-800 dark:text-slate-200">
-                    <span>
-                      {r.name} {r.model} ({r.registrationNumber})
-                    </span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono font-black">
-                      {r.fuelEfficiency} km/L
-                    </span>
-                  </div>
-                  <div className="h-3 bg-slate-50 dark:bg-slate-950 rounded-full overflow-hidden border border-slate-100 dark:border-slate-900">
-                    <div
-                      className="h-full bg-gradient-to-r from-amber-500/80 to-amber-500 rounded-full transition-all duration-500"
-                      style={{ width: `${width}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
           </div>
+        </div>
+
+        {/* --- FLEET EXPENSES BREAKDOWN PIE CHART --- */}
+        <div className="glass-panel p-6 space-y-6 flex flex-col justify-between">
+          <div className="space-y-1">
+            <h3 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+              Fleet Expense Distribution
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+              Total operational outlay breakdown
+            </p>
+          </div>
+
+          <div className="h-[220px] w-full flex items-center justify-center relative">
+            {!isLoading && !isError && expenseBreakdown.length === 0 && (
+              <span className="text-xs text-slate-400 font-bold">No active expenses recorded</span>
+            )}
+            {isLoading && <span className="text-xs text-slate-400 font-bold">Loading...</span>}
+            {isError && <span className="text-xs text-rose-500 font-bold">Failed to load</span>}
+            {!isLoading && !isError && expenseBreakdown.length > 0 && mounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={expenseBreakdown}
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {expenseBreakdown.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: any) => `₹${Number(value).toLocaleString()}`}
+                    contentStyle={{
+                      backgroundColor: "rgba(15, 23, 42, 0.95)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "16px",
+                      color: "#f8fafc",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {!isLoading && !isError && expenseBreakdown.length > 0 && (
+            <div className="grid grid-cols-3 gap-2 text-center text-[9px] font-black uppercase tracking-wider">
+              {expenseBreakdown.map((item) => (
+                <div key={item.name} className="flex flex-col items-center">
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                    <span className="text-slate-500 dark:text-slate-400">{item.name}</span>
+                  </span>
+                  <span className="text-slate-800 dark:text-slate-200 mt-0.5 font-mono">
+                    ₹{item.value.toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

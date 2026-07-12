@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -13,6 +13,18 @@ import {
   Driver,
   VehicleStatus,
 } from "@/lib/api";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
 
 const STATUS_BAR_COLORS: Record<VehicleStatus, string> = {
   AVAILABLE: "bg-emerald-500",
@@ -154,6 +166,31 @@ export default function DashboardPage() {
     RETIRED: filteredVehicles.filter((v) => v.status === "RETIRED").length,
   };
   const maxCount = Math.max(1, ...Object.values(statusCounts));
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const pieData = useMemo(() => {
+    return [
+      { name: "Available", value: availableVehicles, color: "#10b981" },
+      { name: "On Trip", value: onTrip, color: "#0ea5e9" },
+      { name: "In Shop", value: vehiclesInMaintenance, color: "#f59e0b" },
+      { name: "Retired", value: statusCounts.RETIRED, color: "#f43f5e" },
+    ].filter((item) => item.value > 0);
+  }, [availableVehicles, onTrip, vehiclesInMaintenance, statusCounts.RETIRED]);
+
+  const typeChartData = useMemo(() => {
+    const counts: Record<string, number> = {};
+    vehicles.forEach((v) => {
+      counts[v.type] = (counts[v.type] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({
+      name,
+      Count: value,
+    }));
+  }, [vehicles]);
 
   const filtersActive =
     typeFilter !== "All" || statusFilter !== "All" || regionFilter !== "All";
@@ -313,40 +350,101 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Vehicle Status Legend (Invoice Flow styled cards) */}
-        <div className="glass-panel p-6 h-fit">
-          <h2 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-6">
-            Vehicle Status
-          </h2>
-          {isLoading && (
-            <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
-              Loading...
-            </p>
-          )}
-          {!isLoading && statusCounts && (
-            <div className="space-y-4">
-              {(Object.keys(statusCounts) as VehicleStatus[]).map((status) => (
-                <div key={status} className="group">
-                  <div className="flex items-center justify-between text-xs mb-1.5 font-bold">
-                    <span className="text-slate-600 dark:text-slate-300">
-                      {STATUS_LABELS[status]}
-                    </span>
-                    <span className="text-slate-900 dark:text-slate-100 font-black">
-                      {statusCounts[status]}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-100 dark:bg-slate-900 rounded-full overflow-hidden shadow-inner">
-                    <div
-                      className={`h-full ${STATUS_BAR_COLORS[status]} rounded-full transition-all duration-500 group-hover:opacity-90`}
-                      style={{
-                        width: `${(statusCounts[status] / maxCount) * 100}%`,
+        {/* Right Sidebar containing Recharts Graphs */}
+        <div className="space-y-6">
+          {/* Vehicle Status Distribution Card */}
+          <div className="glass-panel p-6 h-fit">
+            <h2 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+              Vehicle Status
+            </h2>
+            {isLoading && (
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                Loading...
+              </p>
+            )}
+            {!isLoading && pieData.length === 0 && (
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                No vehicle data available.
+              </p>
+            )}
+            {!isLoading && pieData.length > 0 && mounted && (
+              <div className="space-y-4">
+                <div className="h-[180px] w-full flex items-center justify-center relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        innerRadius={45}
+                        outerRadius={70}
+                        paddingAngle={3}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(15, 23, 42, 0.95)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          borderRadius: "12px",
+                          color: "#f8fafc",
+                          fontSize: 10,
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-extrabold uppercase tracking-wide">
+                  {pieData.map((item) => (
+                    <div key={item.name} className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-slate-500 dark:text-slate-400">{item.name}</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-mono">({item.value})</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Fleet Distribution by Type Card */}
+          <div className="glass-panel p-6 h-fit">
+            <h2 className="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+              Fleet by Vehicle Type
+            </h2>
+            {isLoading && (
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                Loading...
+              </p>
+            )}
+            {!isLoading && typeChartData.length === 0 && (
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                No active fleet.
+              </p>
+            )}
+            {!isLoading && typeChartData.length > 0 && mounted && (
+              <div className="h-[140px] w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={typeChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.2} />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "12px",
+                        color: "#f8fafc",
+                        fontSize: 10,
                       }}
                     />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                    <Bar dataKey="Count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppShell>
