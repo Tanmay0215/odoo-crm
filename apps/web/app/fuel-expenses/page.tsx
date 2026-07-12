@@ -160,7 +160,7 @@ export default function FuelExpensesPage() {
             Total Fuel Refills
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalFuelCost.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -172,7 +172,7 @@ export default function FuelExpensesPage() {
             Total Tolls & Fees
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalExpenseCost.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -184,7 +184,7 @@ export default function FuelExpensesPage() {
             Cumulative Financial Outlay
           </span>
           <div className="text-2xl font-black text-primary mt-2 font-mono">
-            $
+            ₹
             {cumulativeOutlay.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -272,7 +272,7 @@ export default function FuelExpensesPage() {
                       {Number(log.liters).toFixed(1)} L
                     </td>
                     <td className="px-5 py-4 text-slate-800 dark:text-slate-200 font-extrabold text-right font-mono">
-                      $
+                      ₹
                       {Number(log.cost).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -345,7 +345,7 @@ export default function FuelExpensesPage() {
                       {exp.notes || "N/A"}
                     </td>
                     <td className="px-5 py-4 text-slate-800 dark:text-slate-200 font-extrabold text-right font-mono">
-                      $
+                      ₹
                       {Number(exp.amount).toLocaleString(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -403,7 +403,7 @@ export default function FuelExpensesPage() {
               <FieldError message={errors.liters} />
             </div>
             <div>
-              <Label>Total Outlay Cost ($)</Label>
+              <Label>Total Outlay Cost (₹)</Label>
               <Input
                 required
                 type="number"
@@ -490,7 +490,7 @@ export default function FuelExpensesPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Expense Amount ($)</Label>
+              <Label>Expense Amount (₹)</Label>
               <Input
                 required
                 type="number"

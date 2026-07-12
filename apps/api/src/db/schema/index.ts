@@ -5,3 +5,4 @@ export * from "./maintenance.js";
 export * from "./trips.js";
 export * from "./fuel.js";
 export * from "./expenses.js";
+export * from "./chat.js";

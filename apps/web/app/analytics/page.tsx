@@ -86,19 +86,19 @@ export default function AnalyticsPage() {
 
     autoTable(doc, {
       startY: 56,
-      head: [["Performance Indicator", "Current Outlay Value ($)"]],
+      head: [["Performance Indicator", "Current Outlay Value (₹)"]],
       body: [
         [
           "Total Fleet Revenue Stream",
-          `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+          `₹${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
         ],
         [
           "Total Operational Costs (Fuel & Repairs)",
-          `$${totalCosts.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+          `₹${totalCosts.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
         ],
         [
           "Net Consolidated Profitability",
-          `$${totalProfitability.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+          `₹${totalProfitability.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
         ],
       ],
       theme: "striped",
@@ -120,10 +120,10 @@ export default function AnalyticsPage() {
     const vehicleRows = reports.map((r) => [
       r.registrationNumber,
       r.name,
-      `$${Number(r.revenue).toLocaleString()}`,
-      `$${Number(r.fuelCost).toLocaleString()}`,
-      `$${Number(r.maintenanceCost).toLocaleString()}`,
-      `$${Number(r.totalOperationalCost).toLocaleString()}`,
+      `₹${Number(r.revenue).toLocaleString()}`,
+      `₹${Number(r.fuelCost).toLocaleString()}`,
+      `₹${Number(r.maintenanceCost).toLocaleString()}`,
+      `₹${Number(r.totalOperationalCost).toLocaleString()}`,
       `${Number(r.roi).toFixed(1)}%`,
     ]);
 
@@ -237,7 +237,7 @@ export default function AnalyticsPage() {
             Cumulative Fleet Revenue
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalRevenue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -249,7 +249,7 @@ export default function AnalyticsPage() {
             Total Operational Outlays
           </span>
           <div className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-2 font-mono">
-            $
+            ₹
             {totalCosts.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -268,7 +268,7 @@ export default function AnalyticsPage() {
           <div
             className={`text-2xl font-black mt-2 font-mono ${totalProfitability >= 0 ? "text-emerald-500" : "text-rose-500"}`}
           >
-            $
+            ₹
             {totalProfitability.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -333,7 +333,7 @@ export default function AnalyticsPage() {
                         />
                       </div>
                       <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Rev: ${r.revenue}
+                        Rev: ₹{r.revenue}
                       </span>
                     </div>
                     {/* Operational Cost Bar */}
@@ -345,7 +345,7 @@ export default function AnalyticsPage() {
                         />
                       </div>
                       <span className="text-[10px] font-black text-slate-500 w-24 text-right font-mono">
-                        Cost: ${r.totalOperationalCost}
+                        Cost: ₹{r.totalOperationalCost}
                       </span>
                     </div>
                   </div>
@@ -479,13 +479,13 @@ export default function AnalyticsPage() {
                     {r.odometer.toLocaleString()} km
                   </td>
                   <td className="px-5 py-4 text-blue-500 font-extrabold font-mono">
-                    ${r.revenue.toLocaleString()}
+                    ₹{r.revenue.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold font-mono">
-                    ${r.fuelCost.toLocaleString()}
+                    ₹{r.fuelCost.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold font-mono">
-                    ${r.maintenanceCost.toLocaleString()}
+                    ₹{r.maintenanceCost.toLocaleString()}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <span

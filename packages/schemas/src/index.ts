@@ -161,3 +161,23 @@ export type CreateTripInput = z.infer<typeof CreateTripSchema>;
 export type CompleteTripInput = z.infer<typeof CompleteTripSchema>;
 export type CreateFuelLogInput = z.infer<typeof CreateFuelLogSchema>;
 export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;
+
+// --- Chatbot Schemas ---
+
+export const ChatMessageRoleEnum = z.enum(["user", "assistant", "tool"]);
+export const ChatActionStatusEnum = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "EXPIRED",
+]);
+
+export const SendChatMessageSchema = z.object({
+  conversationId: z.string().uuid().optional(),
+  message: z
+    .string()
+    .min(1, "Message cannot be empty")
+    .max(4000, "Message is too long"),
+});
+
+export type SendChatMessageInput = z.infer<typeof SendChatMessageSchema>;

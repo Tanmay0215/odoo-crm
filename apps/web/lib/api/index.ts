@@ -6,3 +6,4 @@ export * from "./maintenance.client";
 export * from "./dashboard.client";
 export * from "./trips.client";
 export * from "./finances.client";
+export * from "./chat.client";

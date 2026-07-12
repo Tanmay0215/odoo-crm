@@ -33,3 +33,15 @@ export class NotFoundError extends AppError {
     super(message, 404);
   }
 }
+
+export class ServiceUnavailableError extends AppError {
+  constructor(message = "Service temporarily unavailable") {
+    super(message, 503);
+  }
+}
+
+export class TooManyRequestsError extends AppError {
+  constructor(message = "Too many requests") {
+    super(message, 429);
+  }
+}

@@ -101,6 +101,18 @@ export const assertDriverAssignable = async (id: string) => {
   return driver;
 };
 
+/** Row-level scoping for the DRIVER role: resolves the driver record linked to a user account. */
+export const getDriverByUserId = async (userId: string) => {
+  const [driver] = await db
+    .select()
+    .from(drivers)
+    .where(eq(drivers.userId, userId));
+  if (!driver) {
+    throw new NotFoundError("No driver profile is linked to this account");
+  }
+  return driver;
+};
+
 export const getAvailableDrivers = async () => {
   return db
     .select()

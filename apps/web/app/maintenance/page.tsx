@@ -143,7 +143,7 @@ export default function MaintenancePage() {
             </div>
 
             <div>
-              <Label>Cost ($)</Label>
+              <Label>Cost (₹)</Label>
               <Input
                 required
                 disabled={!canManage}
@@ -263,7 +263,7 @@ export default function MaintenancePage() {
                       {log.startDate}
                     </td>
                     <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
-                      ${Number(log.cost).toLocaleString()}
+                      ₹{Number(log.cost).toLocaleString()}
                     </td>
                     <td className="px-5 py-4">
                       <StatusBadge status={log.status} />

@@ -15,6 +15,15 @@ export const listTrips = async () => {
   return db.select().from(trips).orderBy(desc(trips.createdAt));
 };
 
+/** Row-level scoping for the DRIVER role: only trips assigned to the given driver. */
+export const listTripsForDriver = async (driverId: string) => {
+  return db
+    .select()
+    .from(trips)
+    .where(eq(trips.driverId, driverId))
+    .orderBy(desc(trips.createdAt));
+};
+
 export const getTripById = async (id: string) => {
   const [trip] = await db.select().from(trips).where(eq(trips.id, id));
   if (!trip) {
