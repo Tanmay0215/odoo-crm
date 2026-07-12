@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreateTripSchema,
@@ -132,12 +132,12 @@ export default function TripsPage() {
       : 0;
 
   // Handle route coordinates from Google Maps and auto-fill planned distance
-  const handleRouteComputed = (distanceKm: number) => {
+  const handleRouteComputed = useCallback((distanceKm: number) => {
     setForm((prev) => ({
       ...prev,
       plannedDistance: String(distanceKm),
     }));
-  };
+  }, []);
 
   // List filters and sorts
   const filteredTrips = trips.filter((t) => {
@@ -488,9 +488,14 @@ export default function TripsPage() {
         title="Create New Trip"
       >
         <form onSubmit={handleAddSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-0">
             <div>
               <Label>Source (Pickup Warehouse)</Label>
+            </div>
+            <div>
+              <Label>Destination (Delivery Warehouse)</Label>
+            </div>
+            <div>
               <AutocompleteInput
                 value={form.source}
                 onChange={(val) => setForm({ ...form, source: val })}
@@ -499,7 +504,6 @@ export default function TripsPage() {
               <FieldError message={errors.source} />
             </div>
             <div>
-              <Label>Destination (Delivery Warehouse)</Label>
               <AutocompleteInput
                 value={form.destination}
                 onChange={(val) => setForm({ ...form, destination: val })}
@@ -651,7 +655,8 @@ export default function TripsPage() {
             <Input
               required
               type="number"
-              min="1"
+              step="any"
+              min="0.01"
               value={completeForm.actualDistance}
               onChange={(e) =>
                 setCompleteForm({
@@ -669,7 +674,8 @@ export default function TripsPage() {
               <Input
                 required
                 type="number"
-                min="1"
+                step="any"
+                min="0.01"
                 value={completeForm.fuelConsumed}
                 onChange={(e) =>
                   setCompleteForm({
@@ -685,7 +691,8 @@ export default function TripsPage() {
               <Input
                 required
                 type="number"
-                min="1"
+                step="any"
+                min="0.01"
                 value={completeForm.fuelCost}
                 onChange={(e) =>
                   setCompleteForm({ ...completeForm, fuelCost: e.target.value })
@@ -700,7 +707,8 @@ export default function TripsPage() {
             <Input
               required
               type="number"
-              min="1"
+              step="any"
+              min="0.01"
               value={completeForm.finalOdometer}
               onChange={(e) =>
                 setCompleteForm({

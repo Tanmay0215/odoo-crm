@@ -13,6 +13,11 @@ export function TripMap({
 }: TripMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
+  const onRouteComputedRef = useRef(onRouteComputed);
+  useEffect(() => {
+    onRouteComputedRef.current = onRouteComputed;
+  }, [onRouteComputed]);
+
   useEffect(() => {
     if (
       !mapRef.current ||
@@ -69,17 +74,20 @@ export function TripMap({
           directionsRenderer.setDirections(result);
 
           const leg = result.routes[0]?.legs[0];
-          if (leg && onRouteComputed) {
+          if (leg && onRouteComputedRef.current) {
             const distanceInKm = (leg.distance?.value || 0) / 1000;
             const durationText = leg.duration?.text || "Unknown";
-            onRouteComputed(Number(distanceInKm.toFixed(1)), durationText);
+            onRouteComputedRef.current(
+              Number(distanceInKm.toFixed(1)),
+              durationText,
+            );
           }
         } else {
           console.log("Directions request failed with status: " + status);
         }
       },
     );
-  }, [source, destination, onRouteComputed]);
+  }, [source, destination]);
 
   return (
     <div

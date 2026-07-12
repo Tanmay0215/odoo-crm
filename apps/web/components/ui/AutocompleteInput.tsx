@@ -11,60 +11,54 @@ export function AutocompleteInput({
   onChange,
   placeholder,
 }: AutocompleteProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Keep onChange in a ref to avoid re-binding autocomplete listeners
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   useEffect(() => {
-    if (!containerRef.current || typeof google === "undefined") return;
+    if (
+      !inputRef.current ||
+      typeof google === "undefined" ||
+      !google.maps ||
+      !google.maps.places
+    ) {
+      return;
+    }
 
-    // 1. Create the modern non-deprecated Place Autocomplete web component
-    const autocompleteEl = document.createElement("gmp-place-autocomplete");
-    autocompleteEl.setAttribute("placeholder", placeholder);
+    // Initialize classic, robust Google Places Autocomplete on our native input
+    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+      componentRestrictions: { country: "in" }, // Restrict suggestions strictly to India
+      fields: ["formatted_address", "geometry", "name"],
+    });
 
-    // Enforce country restriction strictly to India ("IN") using the modern country attribute
-    autocompleteEl.setAttribute("country", "in");
-
-    // Apply clean styling matching our glassmorphism text fields
-    autocompleteEl.className =
-      "w-full h-10 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:border-blue-500 outline-none transition-all block";
-
-    containerRef.current.innerHTML = "";
-    containerRef.current.appendChild(autocompleteEl);
-
-    // 2. Listen to modern select events (replaces place_changed listener)
-    const handlePlaceSelect = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const place = customEvent.detail.place;
+    // Handle place selection
+    const listener = autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
       if (place) {
-        if (place.formattedAddress) {
-          onChange(place.formattedAddress);
-        } else {
-          // Asynchronously pull displayName or address fields if not hydrated
-          place
-            .fetchFields({ fields: ["displayName", "formattedAddress"] })
-            .then(() => {
-              onChange(place.formattedAddress || place.displayName || "");
-            });
-        }
+        const address = place.formatted_address || place.name || "";
+        onChangeRef.current(address);
       }
-    };
-
-    autocompleteEl.addEventListener("gmp-placeselect", handlePlaceSelect);
+    });
 
     return () => {
-      autocompleteEl.removeEventListener("gmp-placeselect", handlePlaceSelect);
+      if (google && google.maps && google.maps.event && listener) {
+        google.maps.event.removeListener(listener);
+      }
     };
-  }, [onChange, placeholder]);
+  }, []);
 
   return (
-    <div ref={containerRef} className="w-full relative">
-      {/* Standard input fallback while the Google script loads and hydrates the shadow DOM */}
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full h-10 px-3 bg-neutral-950 border border-neutral-800 rounded-lg text-sm text-white placeholder:text-neutral-600 focus:border-blue-500 outline-none transition-all"
-      />
-    </div>
+    <input
+      ref={inputRef}
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full h-10 px-3.5 bg-white/45 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/70 focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all rounded-xl text-sm font-semibold outline-none text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+    />
   );
 }
