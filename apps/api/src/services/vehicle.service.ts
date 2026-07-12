@@ -98,7 +98,16 @@ export const updateVehicle = async (id: string, input: UpdateVehicleInput) => {
 
 export const deleteVehicle = async (id: string) => {
   await getVehicleById(id);
-  await db.delete(vehicles).where(eq(vehicles.id, id));
+  try {
+    await db.delete(vehicles).where(eq(vehicles.id, id));
+  } catch (err) {
+    if (err instanceof Error && "code" in err && err.code === "23503") {
+      throw new BadRequestError(
+        "This vehicle has maintenance records and cannot be deleted. Retire it instead.",
+      );
+    }
+    throw err;
+  }
 };
 
 export const vehicleStatusCounts = async () => {
