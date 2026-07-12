@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "../store/auth";
+import { useAuthStore } from "@/store/auth";
 
 export default function RootPage() {
   const { isAuthenticated } = useAuthStore();

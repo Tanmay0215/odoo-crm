@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../store/auth";
+import { useAuthStore } from "@/store/auth";
 
 const ROLE_LABELS: Record<string, string> = {
   FLEET_MANAGER: "Fleet Manager",

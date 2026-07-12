@@ -3,13 +3,13 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateVehicleSchema, UpdateVehicleSchema } from "@repo/schemas";
-import { AppShell } from "../../components/layout/app-shell";
-import { StatusBadge } from "../../components/ui/status-badge";
-import { Modal } from "../../components/ui/modal";
-import { Input, Label, Select, FieldError } from "../../components/ui/field";
-import { useToast } from "../../components/ui/toast";
-import { useAuthStore } from "../../store/auth";
-import { vehicleClient, Vehicle, VehicleStatus } from "../../lib/api";
+import { AppShell } from "@/components/layout/app-shell";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Modal } from "@/components/ui/modal";
+import { Input, Label, Select, FieldError } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
+import { useAuthStore } from "@/store/auth";
+import { vehicleClient, Vehicle, VehicleStatus } from "@/lib/api";
 
 const VEHICLE_STATUSES: VehicleStatus[] = [
   "AVAILABLE",
@@ -30,6 +30,8 @@ const EMPTY_FORM = {
   region: "",
 };
 
+const EMPTY_VEHICLES: Vehicle[] = [];
+
 export default function FleetPage() {
   const { user } = useAuthStore();
   const { showToast } = useToast();
@@ -49,7 +51,7 @@ export default function FleetPage() {
     queryFn: () => vehicleClient.list(),
   });
 
-  const vehicles = data?.vehicles ?? [];
+  const vehicles = data?.vehicles ?? EMPTY_VEHICLES;
 
   const types = useMemo(
     () => Array.from(new Set(vehicles.map((v) => v.type))).sort(),

@@ -2,24 +2,29 @@ import { Router } from "express";
 import { authenticateJWT } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/rbac.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import * as maintenanceController from "../controllers/maintenance.controller.js";
+import {
+  listMaintenanceLogsHandler,
+  getMaintenanceLogHandler,
+  createMaintenanceLogHandler,
+  updateMaintenanceLogHandler,
+} from "../controllers/maintenance.controller.js";
 
 const router: Router = Router();
 
 router.use(authenticateJWT);
 
-router.get("/", asyncHandler(maintenanceController.listMaintenanceLogs));
-router.get("/:id", asyncHandler(maintenanceController.getMaintenanceLog));
+router.get("/", asyncHandler(listMaintenanceLogsHandler));
+router.get("/:id", asyncHandler(getMaintenanceLogHandler));
 
 router.post(
   "/",
   requireRole(["FLEET_MANAGER"]),
-  asyncHandler(maintenanceController.createMaintenanceLog),
+  asyncHandler(createMaintenanceLogHandler),
 );
 router.put(
   "/:id",
   requireRole(["FLEET_MANAGER"]),
-  asyncHandler(maintenanceController.updateMaintenanceLog),
+  asyncHandler(updateMaintenanceLogHandler),
 );
 
 export default router;

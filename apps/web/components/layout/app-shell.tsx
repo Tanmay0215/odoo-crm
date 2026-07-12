@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../store/auth";
+import { useAuthStore } from "@/store/auth";
 import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 

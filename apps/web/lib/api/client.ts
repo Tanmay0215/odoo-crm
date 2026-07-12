@@ -1,4 +1,4 @@
-import { useAuthStore } from "../../store/auth";
+import { useAuthStore } from "@/store/auth";
 
 const getApiUrl = (): string => {
   const g =

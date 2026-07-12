@@ -3,13 +3,13 @@
 import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateDriverSchema, UpdateDriverSchema } from "@repo/schemas";
-import { AppShell } from "../../components/layout/app-shell";
-import { StatusBadge } from "../../components/ui/status-badge";
-import { Modal } from "../../components/ui/modal";
-import { Input, Label, Select, FieldError } from "../../components/ui/field";
-import { useToast } from "../../components/ui/toast";
-import { useAuthStore } from "../../store/auth";
-import { driverClient, Driver, DriverStatus } from "../../lib/api";
+import { AppShell } from "@/components/layout/app-shell";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Modal } from "@/components/ui/modal";
+import { Input, Label, Select, FieldError } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
+import { useAuthStore } from "@/store/auth";
+import { driverClient, Driver, DriverStatus } from "@/lib/api";
 
 const DRIVER_STATUSES: DriverStatus[] = [
   "AVAILABLE",

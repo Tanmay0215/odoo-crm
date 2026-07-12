@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AppShell } from "../../components/layout/app-shell";
-import { dashboardClient, VehicleStatus } from "../../lib/api";
+import { AppShell } from "@/components/layout/app-shell";
+import { dashboardClient, VehicleStatus } from "@/lib/api";
 
 const STATUS_BAR_COLORS: Record<VehicleStatus, string> = {
   AVAILABLE: "bg-emerald-500",

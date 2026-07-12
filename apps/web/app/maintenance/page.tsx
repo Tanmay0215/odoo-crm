@@ -3,12 +3,12 @@
 import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CreateMaintenanceSchema } from "@repo/schemas";
-import { AppShell } from "../../components/layout/app-shell";
-import { StatusBadge } from "../../components/ui/status-badge";
-import { Input, Label, Select, FieldError } from "../../components/ui/field";
-import { useToast } from "../../components/ui/toast";
-import { useAuthStore } from "../../store/auth";
-import { maintenanceClient, vehicleClient, MaintenanceStatus } from "../../lib/api";
+import { AppShell } from "@/components/layout/app-shell";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Input, Label, Select, FieldError } from "@/components/ui/field";
+import { useToast } from "@/components/ui/toast";
+import { useAuthStore } from "@/store/auth";
+import { maintenanceClient, vehicleClient, MaintenanceStatus } from "@/lib/api";
 
 const SERVICE_TYPES = [
   "Oil Change",

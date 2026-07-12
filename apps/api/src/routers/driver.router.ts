@@ -2,30 +2,37 @@ import { Router } from "express";
 import { authenticateJWT } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/rbac.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import * as driverController from "../controllers/driver.controller.js";
+import {
+  listDriversHandler,
+  listAvailableDriversHandler,
+  getDriverHandler,
+  createDriverHandler,
+  updateDriverHandler,
+  deleteDriverHandler,
+} from "../controllers/driver.controller.js";
 
 const router: Router = Router();
 
 router.use(authenticateJWT);
 
-router.get("/", asyncHandler(driverController.listDrivers));
-router.get("/available", asyncHandler(driverController.listAvailableDrivers));
-router.get("/:id", asyncHandler(driverController.getDriver));
+router.get("/", asyncHandler(listDriversHandler));
+router.get("/available", asyncHandler(listAvailableDriversHandler));
+router.get("/:id", asyncHandler(getDriverHandler));
 
 router.post(
   "/",
   requireRole(["SAFETY_OFFICER"]),
-  asyncHandler(driverController.createDriver),
+  asyncHandler(createDriverHandler),
 );
 router.put(
   "/:id",
   requireRole(["SAFETY_OFFICER"]),
-  asyncHandler(driverController.updateDriver),
+  asyncHandler(updateDriverHandler),
 );
 router.delete(
   "/:id",
   requireRole(["SAFETY_OFFICER"]),
-  asyncHandler(driverController.deleteDriver),
+  asyncHandler(deleteDriverHandler),
 );
 
 export default router;

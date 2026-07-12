@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "../../lib/api";
-import { useAuthStore } from "../../store/auth";
+import { authClient } from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
 
 export default function LoginPage() {
   const { isAuthenticated, login } = useAuthStore();
@@ -113,9 +113,6 @@ export default function LoginPage() {
           <div className="w-full max-w-[320px] mx-auto space-y-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-white mb-2">
-                <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-md">
-                  T
-                </div>
                 <span>TransitOps</span>
               </div>
               <h2 className="text-2xl font-extrabold text-white tracking-tight">
@@ -220,9 +217,6 @@ export default function LoginPage() {
           <div className="w-full max-w-[320px] mx-auto space-y-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-white mb-2">
-                <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black text-sm shadow-md">
-                  T
-                </div>
                 <span>TransitOps</span>
               </div>
               <h2 className="text-2xl font-extrabold text-white tracking-tight">
@@ -279,7 +273,7 @@ export default function LoginPage() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                  Operational Role (RBAC)
+                  Operational Role
                 </label>
                 <select
                   value={registerForm.role}
