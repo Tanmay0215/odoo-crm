@@ -57,15 +57,15 @@ function SortHeader({
 }) {
   const active = activeKey === sortKey;
   return (
-    <th className="px-4 py-3 font-semibold">
+    <th className="px-5 py-4.5">
       <button
         onClick={() => onSort(sortKey)}
-        className={`flex items-center gap-1 hover:text-neutral-200 transition-colors ${
-          active ? "text-neutral-200" : ""
+        className={`flex items-center gap-1.5 hover:text-primary transition-all ${
+          active ? "text-primary font-black" : ""
         }`}
       >
-        {label}
-        <span className="text-[10px]">
+        <span>{label}</span>
+        <span className="text-[9px] translate-y-[0.5px]">
           {active ? (dir === "asc" ? "▲" : "▼") : ""}
         </span>
       </button>
@@ -230,20 +230,24 @@ export default function FleetPage() {
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
 
+  const dropdownClasses =
+    "h-10 px-3.5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/70 rounded-xl text-xs font-bold outline-none text-slate-700 dark:text-slate-200 shadow-sm transition-all focus:border-primary cursor-pointer";
+
   return (
     <AppShell title="Vehicle Registry">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+      {/* Dynamic filters and actions top bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search registration or name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-white placeholder:text-neutral-600 focus:border-blue-500/60 w-full sm:w-64"
+          className="h-10 px-4 bg-white/45 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/70 rounded-xl text-xs font-bold outline-none text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary w-full sm:w-64 shadow-sm transition-all"
         />
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-neutral-200"
+          className={dropdownClasses}
         >
           <option value="All">All Types</option>
           {types.map((t) => (
@@ -255,9 +259,9 @@ export default function FleetPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-neutral-200"
+          className={dropdownClasses}
         >
-          <option value="All">All Status</option>
+          <option value="All">All Statuses</option>
           {VEHICLE_STATUSES.map((s) => (
             <option key={s} value={s}>
               {s.replace("_", " ")}
@@ -268,46 +272,92 @@ export default function FleetPage() {
         {canManage && (
           <button
             onClick={openCreate}
-            className="sm:ml-auto h-10 px-4 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-blue-900/10"
+            className="sm:ml-auto h-10 px-5 bg-primary hover:bg-primary/95 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-primary/10 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer"
           >
             + Add Vehicle
           </button>
         )}
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+      {/* Main glassmorphism table panel */}
+      <div className="glass-panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-800 text-left text-neutral-500 text-xs uppercase tracking-wider">
-                <SortHeader label="Reg. No" sortKey="registrationNumber" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="Name / Model" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="Type" sortKey="type" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <th className="px-4 py-3 font-semibold">Capacity</th>
-                <SortHeader label="Odometer" sortKey="odometer" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="Cost" sortKey="acquisitionCost" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                {canManage && <th className="px-4 py-3 font-semibold">Actions</th>}
+              <tr className="border-b border-slate-100 dark:border-slate-900 text-left text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-extrabold bg-slate-50/40 dark:bg-slate-950/15">
+                <SortHeader
+                  label="Reg. No"
+                  sortKey="registrationNumber"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="Name / Model"
+                  sortKey="name"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="Type"
+                  sortKey="type"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <th className="px-5 py-4.5">Capacity</th>
+                <SortHeader
+                  label="Odometer"
+                  sortKey="odometer"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="Cost"
+                  sortKey="acquisitionCost"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                {canManage && <th className="px-5 py-4.5">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-bold leading-relaxed"
+                  >
                     Loading vehicles...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-red-400">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-rose-500 font-bold leading-relaxed"
+                  >
                     Failed to load vehicles.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && sorted.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-bold leading-relaxed"
+                  >
                     No vehicles found. {canManage && "Add one to get started."}
                   </td>
                 </tr>
@@ -315,44 +365,55 @@ export default function FleetPage() {
               {sorted.map((vehicle) => (
                 <tr
                   key={vehicle.id}
-                  className="border-b border-neutral-800/60 last:border-0 hover:bg-neutral-800/30 transition-colors"
+                  className="border-b border-slate-100/50 dark:border-slate-900/30 last:border-0 hover:bg-white/20 dark:hover:bg-slate-900/10 transition-colors"
                 >
-                  <td className="px-4 py-3 font-mono text-neutral-200">
+                  <td className="px-5 py-4 font-mono font-bold text-slate-800 dark:text-slate-200">
                     {vehicle.registrationNumber}
                   </td>
-                  <td className="px-4 py-3 text-neutral-300">
+                  <td className="px-5 py-4 text-slate-700 dark:text-slate-300 font-bold">
                     {vehicle.name}
                     {vehicle.model && (
-                      <span className="text-neutral-500"> / {vehicle.model}</span>
+                      <span className="text-slate-400 dark:text-slate-500 font-medium">
+                        {" "}
+                        / {vehicle.model}
+                      </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-neutral-400">{vehicle.type}</td>
-                  <td className="px-4 py-3 text-neutral-400">
+                  <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
+                    {vehicle.type}
+                  </td>
+                  <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
                     {vehicle.maxLoadCapacity} kg
                   </td>
-                  <td className="px-4 py-3 text-neutral-400">{vehicle.odometer}</td>
-                  <td className="px-4 py-3 text-neutral-400">
+                  <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-mono font-bold">
+                    {vehicle.odometer}
+                  </td>
+                  <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
                     ${Number(vehicle.acquisitionCost).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-5 py-4">
                     <StatusBadge status={vehicle.status} />
                   </td>
                   {canManage && (
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => openEdit(vehicle)}
-                          className="text-blue-400 hover:text-blue-300 text-xs font-semibold"
+                          className="text-primary hover:text-primary/80 text-xs font-black hover:underline cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm(`Delete vehicle ${vehicle.registrationNumber}?`)) {
+                            if (
+                              confirm(
+                                `Delete vehicle ${vehicle.registrationNumber}?`,
+                              )
+                            ) {
                               deleteMutation.mutate(vehicle.id);
                             }
                           }}
-                          className="text-red-400 hover:text-red-300 text-xs font-semibold"
+                          className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-xs font-black hover:underline cursor-pointer"
                         >
                           Delete
                         </button>
@@ -366,12 +427,13 @@ export default function FleetPage() {
         </div>
       </div>
 
+      {/* Editing / Creating modal form */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
         title={editing ? "Edit Vehicle" : "Add Vehicle"}
       >
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Registration Number</Label>
             <Input
@@ -385,9 +447,9 @@ export default function FleetPage() {
             <FieldError message={errors.registrationNumber} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Name / Model Label</Label>
+              <Label>Name / Label</Label>
               <Input
                 required
                 value={form.name}
@@ -406,7 +468,7 @@ export default function FleetPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Type</Label>
               <Input
@@ -434,7 +496,7 @@ export default function FleetPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Max Load Capacity (kg)</Label>
               <Input
@@ -450,7 +512,7 @@ export default function FleetPage() {
               <FieldError message={errors.maxLoadCapacity} />
             </div>
             <div>
-              <Label>Odometer</Label>
+              <Label>Odometer (km)</Label>
               <Input
                 type="number"
                 min="0"
@@ -460,7 +522,7 @@ export default function FleetPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Acquisition Cost ($)</Label>
               <Input
@@ -488,7 +550,7 @@ export default function FleetPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white h-10 rounded-lg text-sm font-semibold tracking-wide transition-all disabled:opacity-50 mt-2"
+            className="w-full bg-primary hover:bg-primary/95 text-white h-11 rounded-xl text-xs font-black tracking-wider transition-all shadow-lg shadow-primary/10 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 mt-3 cursor-pointer"
           >
             {isSaving ? "Saving..." : editing ? "Save Changes" : "Add Vehicle"}
           </button>

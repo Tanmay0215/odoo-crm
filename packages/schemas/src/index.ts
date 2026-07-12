@@ -35,9 +35,13 @@ export const CreateVehicleSchema = z.object({
   name: z.string().min(1, "Name/model is required"),
   model: z.string().optional(),
   type: z.string().min(1, "Vehicle type is required"),
-  maxLoadCapacity: z.coerce.number().positive("Capacity must be a positive number"),
+  maxLoadCapacity: z.coerce
+    .number()
+    .positive("Capacity must be a positive number"),
   odometer: z.coerce.number().nonnegative().default(0),
-  acquisitionCost: z.coerce.number().positive("Acquisition cost must be a positive number"),
+  acquisitionCost: z.coerce
+    .number()
+    .positive("Acquisition cost must be a positive number"),
   status: VehicleStatusEnum.default("AVAILABLE"),
   region: z.string().optional(),
 });
@@ -100,3 +104,60 @@ export const UpdateMaintenanceSchema = z.object({
 
 export type CreateMaintenanceInput = z.infer<typeof CreateMaintenanceSchema>;
 export type UpdateMaintenanceInput = z.infer<typeof UpdateMaintenanceSchema>;
+
+// --- Phase 2 Schemas ---
+
+export const TripStatusEnum = z.enum([
+  "DRAFT",
+  "DISPATCHED",
+  "COMPLETED",
+  "CANCELLED",
+]);
+
+export const CreateTripSchema = z.object({
+  source: z.string().min(2, "Pickup location is required"),
+  destination: z.string().min(2, "Destination is required"),
+  vehicleId: z.string().uuid("A valid vehicle is required"),
+  driverId: z.string().uuid("A valid driver is required"),
+  cargoWeight: z.coerce
+    .number()
+    .positive("Cargo weight must be a positive number"),
+  plannedDistance: z.coerce
+    .number()
+    .positive("Planned distance must be computed"),
+  revenue: z.coerce
+    .number()
+    .nonnegative("Revenue cannot be negative")
+    .default(0),
+});
+
+export const CompleteTripSchema = z.object({
+  actualDistance: z.coerce.number().positive("Actual distance is required"),
+  fuelConsumed: z.coerce
+    .number()
+    .positive("Fuel consumed in liters is required"),
+  fuelCost: z.coerce.number().positive("Fuel cost is required"),
+  finalOdometer: z.coerce
+    .number()
+    .positive("Final odometer reading is required"),
+});
+
+export const CreateFuelLogSchema = z.object({
+  vehicleId: z.string().uuid("A valid vehicle is required"),
+  liters: z.coerce.number().positive("Liters must be positive"),
+  cost: z.coerce.number().positive("Cost must be positive"),
+  date: z.string().min(1, "Date is required"),
+});
+
+export const CreateExpenseSchema = z.object({
+  vehicleId: z.string().uuid("A valid vehicle is required"),
+  type: z.string().min(1, "Expense type is required"),
+  amount: z.coerce.number().positive("Amount must be positive"),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().optional(),
+});
+
+export type CreateTripInput = z.infer<typeof CreateTripSchema>;
+export type CompleteTripInput = z.infer<typeof CompleteTripSchema>;
+export type CreateFuelLogInput = z.infer<typeof CreateFuelLogSchema>;
+export type CreateExpenseInput = z.infer<typeof CreateExpenseSchema>;

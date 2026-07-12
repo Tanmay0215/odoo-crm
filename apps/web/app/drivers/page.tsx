@@ -54,15 +54,15 @@ function SortHeader({
 }) {
   const active = activeKey === sortKey;
   return (
-    <th className="px-4 py-3 font-semibold">
+    <th className="px-5 py-4.5">
       <button
         onClick={() => onSort(sortKey)}
-        className={`flex items-center gap-1 hover:text-neutral-200 transition-colors ${
-          active ? "text-neutral-200" : ""
+        className={`flex items-center gap-1.5 hover:text-primary transition-all ${
+          active ? "text-primary font-black" : ""
         }`}
       >
-        {label}
-        <span className="text-[10px]">
+        <span>{label}</span>
+        <span className="text-[9px] translate-y-[0.5px]">
           {active ? (dir === "asc" ? "▲" : "▼") : ""}
         </span>
       </button>
@@ -219,57 +219,98 @@ export default function DriversPage() {
 
   return (
     <AppShell title="Drivers & Safety Profiles">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+      {/* Search and actions bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search driver name or license..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-10 px-3 bg-neutral-900 border border-neutral-800 rounded-lg text-sm outline-none text-white placeholder:text-neutral-600 focus:border-blue-500/60 w-full sm:w-64"
+          className="h-10 px-4 bg-white/45 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/70 rounded-xl text-xs font-bold outline-none text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-primary w-full sm:w-64 shadow-sm transition-all"
         />
         {canManage && (
           <button
             onClick={openCreate}
-            className="sm:ml-auto h-10 px-4 bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white rounded-lg text-sm font-semibold transition-all shadow-lg shadow-blue-900/10"
+            className="sm:ml-auto h-10 px-5 bg-primary hover:bg-primary/95 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-primary/10 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer"
           >
             + Add Driver
           </button>
         )}
       </div>
 
-      <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+      {/* Main Table panel */}
+      <div className="glass-panel overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-neutral-800 text-left text-neutral-500 text-xs uppercase tracking-wider">
-                <SortHeader label="Driver Name" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="License No" sortKey="licenseNumber" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <th className="px-4 py-3 font-semibold">Category</th>
-                <SortHeader label="Expiry Date" sortKey="licenseExpiryDate" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <th className="px-4 py-3 font-semibold">Contact</th>
-                <SortHeader label="Safety Score" sortKey="safetyScore" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                <SortHeader label="Status" sortKey="status" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
-                {canManage && <th className="px-4 py-3 font-semibold">Actions</th>}
+              <tr className="border-b border-slate-100 dark:border-slate-900 text-left text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-widest font-extrabold bg-slate-50/40 dark:bg-slate-950/15">
+                <SortHeader
+                  label="Driver Name"
+                  sortKey="name"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="License No"
+                  sortKey="licenseNumber"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <th className="px-5 py-4.5">Category</th>
+                <SortHeader
+                  label="Expiry Date"
+                  sortKey="licenseExpiryDate"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <th className="px-5 py-4.5">Contact</th>
+                <SortHeader
+                  label="Safety Score"
+                  sortKey="safetyScore"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                <SortHeader
+                  label="Status"
+                  sortKey="status"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={handleSort}
+                />
+                {canManage && <th className="px-5 py-4.5">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-bold leading-relaxed"
+                  >
                     Loading drivers...
                   </td>
                 </tr>
               )}
               {isError && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-red-400">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-rose-500 font-bold leading-relaxed"
+                  >
                     Failed to load drivers.
                   </td>
                 </tr>
               )}
               {!isLoading && !isError && sorted.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-5 py-12 text-center text-slate-400 dark:text-slate-500 font-bold leading-relaxed"
+                  >
                     No drivers found. {canManage && "Add one to get started."}
                   </td>
                 </tr>
@@ -279,30 +320,36 @@ export default function DriversPage() {
                 return (
                   <tr
                     key={driver.id}
-                    className="border-b border-neutral-800/60 last:border-0 hover:bg-neutral-800/30 transition-colors"
+                    className="border-b border-slate-100/50 dark:border-slate-900/30 last:border-0 hover:bg-white/20 dark:hover:bg-slate-900/10 transition-colors"
                   >
-                    <td className="px-4 py-3 text-neutral-200 font-medium">
+                    <td className="px-5 py-4 text-slate-800 dark:text-slate-200 font-bold">
                       {driver.name}
                     </td>
-                    <td className="px-4 py-3 font-mono text-neutral-400">
+                    <td className="px-5 py-4 font-mono text-slate-500 dark:text-slate-400 font-bold">
                       {driver.licenseNumber}
                     </td>
-                    <td className="px-4 py-3 text-neutral-400">
+                    <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
                       {driver.licenseCategory}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={expired ? "text-red-400 font-semibold" : "text-neutral-400"}>
+                    <td className="px-5 py-4 font-bold">
+                      <span
+                        className={
+                          expired
+                            ? "text-rose-600 dark:text-rose-400 font-extrabold"
+                            : "text-slate-500 dark:text-slate-400"
+                        }
+                      >
                         {driver.licenseExpiryDate}
                         {expired && " EXPIRED"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-neutral-400">
+                    <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-mono font-bold">
                       {driver.contactNumber}
                     </td>
-                    <td className="px-4 py-3 text-neutral-400">
+                    <td className="px-5 py-4 text-slate-500 dark:text-slate-400 font-bold">
                       {driver.safetyScore}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4">
                       {canManage ? (
                         <select
                           value={driver.status}
@@ -312,7 +359,7 @@ export default function DriversPage() {
                               status: e.target.value as DriverStatus,
                             })
                           }
-                          className="bg-neutral-950 border border-neutral-800 rounded-full text-xs font-semibold px-2 py-0.5 outline-none text-neutral-200"
+                          className="bg-white/60 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/60 rounded-full text-[10px] font-black uppercase tracking-wider px-3 py-1 outline-none text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-700 focus:border-primary transition-all cursor-pointer"
                         >
                           {DRIVER_STATUSES.map((s) => (
                             <option key={s} value={s}>
@@ -325,11 +372,11 @@ export default function DriversPage() {
                       )}
                     </td>
                     {canManage && (
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => openEdit(driver)}
-                            className="text-blue-400 hover:text-blue-300 text-xs font-semibold"
+                            className="text-primary hover:text-primary/80 text-xs font-black hover:underline cursor-pointer"
                           >
                             Edit
                           </button>
@@ -339,7 +386,7 @@ export default function DriversPage() {
                                 deleteMutation.mutate(driver.id);
                               }
                             }}
-                            className="text-red-400 hover:text-red-300 text-xs font-semibold"
+                            className="text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 text-xs font-black hover:underline cursor-pointer"
                           >
                             Delete
                           </button>
@@ -354,12 +401,13 @@ export default function DriversPage() {
         </div>
       </div>
 
+      {/* Editing / Creating modal */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
         title={editing ? "Edit Driver" : "Add Driver"}
       >
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Full Name</Label>
             <Input
@@ -371,7 +419,7 @@ export default function DriversPage() {
             <FieldError message={errors.name} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>License Number</Label>
               <Input
@@ -398,7 +446,7 @@ export default function DriversPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>License Expiry Date</Label>
               <Input
@@ -425,7 +473,7 @@ export default function DriversPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Safety Score (0-100)</Label>
               <Input
@@ -458,7 +506,7 @@ export default function DriversPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white h-10 rounded-lg text-sm font-semibold tracking-wide transition-all disabled:opacity-50 mt-2"
+            className="w-full bg-primary hover:bg-primary/95 text-white h-11 rounded-xl text-xs font-black tracking-wider transition-all shadow-lg shadow-primary/10 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 mt-3 cursor-pointer"
           >
             {isSaving ? "Saving..." : editing ? "Save Changes" : "Add Driver"}
           </button>

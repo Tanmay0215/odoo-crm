@@ -4,3 +4,5 @@ export * from "./vehicle.client";
 export * from "./driver.client";
 export * from "./maintenance.client";
 export * from "./dashboard.client";
+export * from "./trips.client";
+export * from "./finances.client";

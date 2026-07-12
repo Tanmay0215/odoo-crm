@@ -1,13 +1,15 @@
 import express, { Express } from "express";
 import cors from "cors";
-import dotenv from "dotenv"; 
-import { env } from "./config/env.config.js";
+import dotenv from "dotenv";
 
+import { env } from "./config/env.config.js";
 import authRouter from "./routers/auth.router.js";
 import vehicleRouter from "./routers/vehicle.router.js";
 import driverRouter from "./routers/driver.router.js";
 import maintenanceRouter from "./routers/maintenance.router.js";
 import dashboardRouter from "./routers/dashboard.router.js";
+import tripRouter from "./routers/trip.router.js";
+import financeRouter from "./routers/finance.router.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
 // Load env
@@ -33,6 +35,8 @@ app.use("/api/vehicles", vehicleRouter);
 app.use("/api/drivers", driverRouter);
 app.use("/api/maintenance", maintenanceRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/trips", tripRouter);
+app.use("/api/finances", financeRouter);
 
 // Standard Health check
 app.get("/api/health", (_req, res) => {
@@ -46,7 +50,7 @@ app.get("/api/health", (_req, res) => {
 app.use(errorHandler);
 
 // Start Server
-app.listen(env.PORT, async () => {
+app.listen(env.PORT, () => {
   console.log(`TransitOps Express server listening on port ${env.PORT}`);
 });
 

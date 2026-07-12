@@ -42,8 +42,8 @@ export default function LoginPage() {
 
   if (!mounted || isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-sm" />
       </div>
     );
   }
@@ -100,11 +100,16 @@ export default function LoginPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-200 flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+  const inputClasses =
+    "w-full h-10 px-3.5 bg-white/45 dark:bg-slate-950/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700/70 focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all rounded-xl text-sm font-semibold outline-none text-foreground placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-sm";
 
-      <div className="relative w-full max-w-[840px] min-h-[540px] bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+      {/* Dynamic Background Blur Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 dark:bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+
+      {/* Main Glassmorphism container */}
+      <div className="relative w-full max-w-[840px] min-h-[580px] bg-white/50 dark:bg-slate-900/35 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row backdrop-blur-xl animate-in fade-in zoom-in-95 duration-500">
         {/* --- LEFT FORM AREA (SIGN IN) --- */}
         <div
           className={`w-full md:w-1/2 md:h-full flex flex-col justify-center p-6 sm:p-8 md:p-10 transition-all duration-500 ease-in-out z-10 overflow-y-auto
@@ -112,31 +117,31 @@ export default function LoginPage() {
         >
           <div className="w-full max-w-[320px] mx-auto space-y-6">
             <div className="space-y-2">
-              <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-white mb-2">
+              <div className="flex items-center gap-2 font-black text-xl tracking-tight text-primary mb-2">
                 <span>TransitOps</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 Welcome back
               </h2>
-              <p className="text-neutral-400 text-xs font-medium">
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
                 Enter your credentials to manage transport assets
               </p>
             </div>
 
             {error && !isSignUp && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-medium">
+              <div className="p-3.5 bg-rose-50/90 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl text-rose-800 dark:text-rose-400 text-xs font-bold leading-relaxed">
                 {error}
               </div>
             )}
             {success && !isSignUp && (
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-medium animate-pulse">
+              <div className="p-3.5 bg-emerald-50/90 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl text-emerald-800 dark:text-emerald-400 text-xs font-bold animate-pulse leading-relaxed">
                 {success}
               </div>
             )}
 
             <form onSubmit={handleLoginSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Email
                 </label>
                 <input
@@ -147,12 +152,12 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setLoginForm({ ...loginForm, email: e.target.value })
                   }
-                  className="w-full h-10 px-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                  className={inputClasses}
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Password
                 </label>
                 <div className="relative">
@@ -164,24 +169,27 @@ export default function LoginPage() {
                     onChange={(e) =>
                       setLoginForm({ ...loginForm, password: e.target.value })
                     }
-                    className="w-full h-10 pl-3 pr-10 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                    className={`${inputClasses} pr-14`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+                    className="absolute right-4.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs">
-                <label className="flex items-center gap-2 text-neutral-400 font-medium">
-                  <input type="checkbox" className="accent-blue-600" />
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <label className="flex items-center gap-2 text-slate-500 dark:text-slate-400 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded-lg border-slate-200 text-primary focus:ring-primary accent-primary"
+                  />
                   Remember me
                 </label>
-                <span className="text-neutral-600 cursor-not-allowed">
+                <span className="text-slate-400 dark:text-slate-600 cursor-not-allowed">
                   Forgot password?
                 </span>
               </div>
@@ -189,19 +197,19 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white h-10 transition-all rounded-lg text-sm font-semibold tracking-wide shadow-lg shadow-blue-900/10 hover:-translate-y-0.5 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-primary hover:bg-primary/95 text-white h-11 transition-all rounded-xl font-bold tracking-wide shadow-lg shadow-primary/20 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] mt-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? "Verifying..." : "Sign In"}
               </button>
             </form>
 
-            <div className="text-center md:hidden">
-              <span className="text-neutral-500 text-xs">
+            <div className="text-center md:hidden pt-2">
+              <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold">
                 {"Don't have an account? "}
               </span>
               <button
                 onClick={() => setIsSignUp(true)}
-                className="text-blue-500 hover:text-blue-400 font-bold text-xs underline"
+                className="text-primary hover:text-primary/80 font-black text-xs underline"
               >
                 Create Account
               </button>
@@ -214,33 +222,33 @@ export default function LoginPage() {
           className={`w-full md:w-1/2 md:h-full flex flex-col justify-center p-6 sm:p-8 md:p-10 transition-all duration-500 ease-in-out z-10 overflow-y-auto
           ${!isSignUp ? "opacity-0 pointer-events-none hidden md:flex" : "relative opacity-100 pointer-events-auto flex"}`}
         >
-          <div className="w-full max-w-[320px] mx-auto space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-white mb-2">
+          <div className="w-full max-w-[320px] mx-auto space-y-5">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 font-black text-xl tracking-tight text-primary mb-1">
                 <span>TransitOps</span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white tracking-tight">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 Create account
               </h2>
-              <p className="text-neutral-400 text-xs font-medium">
-                Join TransitOps compliance, fleet, & logistics network
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold leading-relaxed">
+                Join TransitOps logistics & compliance network
               </p>
             </div>
 
             {error && isSignUp && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-medium">
+              <div className="p-3 bg-rose-50/90 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 rounded-xl text-rose-800 dark:text-rose-400 text-xs font-bold leading-relaxed">
                 {error}
               </div>
             )}
             {success && isSignUp && (
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs font-medium animate-pulse">
+              <div className="p-3 bg-emerald-50/90 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-xl text-emerald-800 dark:text-emerald-400 text-xs font-bold animate-pulse leading-relaxed">
                 {success}
               </div>
             )}
 
-            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+            <form onSubmit={handleRegisterSubmit} className="space-y-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Full Name
                 </label>
                 <input
@@ -251,12 +259,12 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setRegisterForm({ ...registerForm, name: e.target.value })
                   }
-                  className="w-full h-9 px-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                  className={inputClasses}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Email Address
                 </label>
                 <input
@@ -267,12 +275,12 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setRegisterForm({ ...registerForm, email: e.target.value })
                   }
-                  className="w-full h-9 px-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                  className={inputClasses}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Operational Role
                 </label>
                 <select
@@ -287,7 +295,7 @@ export default function LoginPage() {
                         | "FINANCIAL_ANALYST",
                     })
                   }
-                  className="w-full h-9 px-2 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-neutral-200"
+                  className={`${inputClasses} appearance-none cursor-pointer`}
                 >
                   <option value="FLEET_MANAGER">Fleet Manager</option>
                   <option value="DRIVER">Driver</option>
@@ -297,7 +305,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Password
                 </label>
                 <div className="relative">
@@ -312,12 +320,12 @@ export default function LoginPage() {
                         password: e.target.value,
                       })
                     }
-                    className="w-full h-9 pl-3 pr-10 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                    className={`${inputClasses} pr-14`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+                    className="absolute right-4.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -325,7 +333,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                <label className="text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -340,12 +348,12 @@ export default function LoginPage() {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className="w-full h-9 pl-3 pr-10 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/30 transition-all rounded-lg text-sm font-medium outline-none text-white placeholder:text-neutral-600"
+                    className={`${inputClasses} pr-14`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors"
+                    className="absolute right-4.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors"
                   >
                     {showConfirmPassword ? "Hide" : "Show"}
                   </button>
@@ -355,19 +363,19 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-500 active:scale-[0.98] text-white h-10 transition-all rounded-lg text-sm font-semibold tracking-wide shadow-lg shadow-blue-900/10 hover:-translate-y-0.5 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-primary hover:bg-primary/95 text-white h-11 transition-all rounded-xl font-bold tracking-wide shadow-lg shadow-primary/20 hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] mt-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? "Creating..." : "Create Account"}
               </button>
             </form>
 
-            <div className="text-center md:hidden">
-              <span className="text-neutral-500 text-xs">
+            <div className="text-center md:hidden pt-2">
+              <span className="text-slate-500 dark:text-slate-400 text-xs font-semibold">
                 Already have an account?{" "}
               </span>
               <button
                 onClick={() => setIsSignUp(false)}
-                className="text-blue-500 hover:text-blue-400 font-bold text-xs underline"
+                className="text-primary hover:text-primary/80 font-black text-xs underline"
               >
                 Sign In
               </button>
@@ -377,20 +385,21 @@ export default function LoginPage() {
 
         {/* --- SLIDING OVERLAY (Desktop) --- */}
         <div
-          className={`hidden md:flex absolute top-0 h-full w-1/2 bg-blue-600/95 backdrop-blur-md z-20 text-white items-center justify-center p-8 text-center shadow-2xl overflow-hidden transition-all duration-500 ease-in-out
+          className={`hidden md:flex absolute top-0 h-full w-1/2 bg-primary dark:bg-primary/95 z-20 text-white items-center justify-center p-8 text-center shadow-2xl overflow-hidden transition-all duration-500 ease-in-out
           ${isSignUp ? "translate-x-0 rounded-l-[1.5rem]" : "translate-x-full rounded-r-[1.5rem]"}`}
         >
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-500/40 via-transparent to-transparent opacity-80 pointer-events-none" />
+          {/* Circular gradient light highlights */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 dark:from-slate-900/15 via-transparent to-transparent opacity-80 pointer-events-none" />
 
           <div className="relative z-10 space-y-6 flex flex-col items-center">
-            <div className="w-20 h-20 bg-white/10 text-white rounded-full flex items-center justify-center border border-white/20 shadow-xl shadow-blue-950/20">
+            <div className="w-16 h-16 bg-white/10 text-white rounded-2xl flex items-center justify-center border border-white/20 shadow-xl shadow-primary/5">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-10 h-10"
+                className="w-8 h-8"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth={1.5}
+                strokeWidth={1.8}
               >
                 <path
                   strokeLinecap="round"
@@ -406,10 +415,10 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-xl font-bold tracking-tight">
+              <h3 className="text-lg font-black tracking-tight uppercase">
                 {isSignUp ? "Already registered?" : "New to TransitOps?"}
               </h3>
-              <p className="text-blue-100 text-xs leading-relaxed max-w-xs mx-auto font-medium">
+              <p className="text-teal-50 dark:text-teal-100 text-xs leading-relaxed max-w-[240px] mx-auto font-semibold">
                 {isSignUp
                   ? "Log in with your operational credentials to monitor active trips, vehicles, and analytics."
                   : "Create an account to digitize logistics, fleet assets, maintenance logs, and fuel tracking."}
@@ -422,7 +431,7 @@ export default function LoginPage() {
                 setError(null);
                 setSuccess(null);
               }}
-              className="px-8 py-2.5 text-xs rounded-full bg-white hover:bg-neutral-50 active:scale-95 text-blue-600 transition-all font-bold tracking-wide shadow-xl hover:-translate-y-0.5"
+              className="px-8 py-2.5 text-xs rounded-full bg-white hover:bg-teal-50 hover:scale-105 active:scale-95 text-primary transition-all font-black tracking-wider shadow-lg hover:-translate-y-0.5 cursor-pointer"
             >
               {isSignUp ? "Sign In" : "Create Account"}
             </button>

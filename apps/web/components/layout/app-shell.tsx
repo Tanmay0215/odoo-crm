@@ -30,22 +30,24 @@ export function AppShell({
 
   if (!mounted || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin shadow-sm" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-neutral-950 text-neutral-200">
+    <div className="flex min-h-screen bg-background text-foreground overflow-hidden">
       <Sidebar />
       <MobileSidebarDrawer
         open={mobileNavOpen}
         onClose={() => setMobileNavOpen(false)}
       />
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden">
         <Header title={title} onMenuClick={() => setMobileNavOpen(true)} />
-        <main className="flex-1 p-4 md:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+          {children}
+        </main>
       </div>
     </div>
   );
