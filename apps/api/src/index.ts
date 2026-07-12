@@ -4,6 +4,10 @@ import dotenv from "dotenv";
 import { env } from "./config/env.config.js";
 
 import authRouter from "./routers/auth.router.js";
+import vehicleRouter from "./routers/vehicle.router.js";
+import driverRouter from "./routers/driver.router.js";
+import maintenanceRouter from "./routers/maintenance.router.js";
+import dashboardRouter from "./routers/dashboard.router.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
 // Load env
@@ -25,6 +29,10 @@ app.use(express.json());
 
 // Mount Modular Routers
 app.use("/api/auth", authRouter);
+app.use("/api/vehicles", vehicleRouter);
+app.use("/api/drivers", driverRouter);
+app.use("/api/maintenance", maintenanceRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 // Standard Health check
 app.get("/api/health", (_req, res) => {
