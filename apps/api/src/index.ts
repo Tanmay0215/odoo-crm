@@ -10,6 +10,7 @@ import maintenanceRouter from "./routers/maintenance.router.js";
 import dashboardRouter from "./routers/dashboard.router.js";
 import tripRouter from "./routers/trip.router.js";
 import financeRouter from "./routers/finance.router.js";
+import chatRouter from "./routers/chat.router.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 
 // Load env
@@ -37,6 +38,7 @@ app.use("/api/maintenance", maintenanceRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/trips", tripRouter);
 app.use("/api/finances", financeRouter);
+app.use("/api/chat", chatRouter);
 
 // Standard Health check
 app.get("/api/health", (_req, res) => {
