@@ -61,7 +61,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       <div className="px-5 py-4 border-t border-neutral-800 text-[10px] text-neutral-600 font-medium">
-        TransitOps &copy; 2026 &middot; RBAC Enabled
+        TransitOps &copy; 2026
       </div>
     </>
   );
