@@ -3,8 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
 import { financesClient } from "@/lib/api";
+import { useAuthStore } from "@/store/auth";
 
 export default function AnalyticsPage() {
+  const { user, token } = useAuthStore();
+
   const {
     data: reports = [],
     isLoading,
@@ -14,9 +17,155 @@ export default function AnalyticsPage() {
     queryFn: () => financesClient.getReports(),
   });
 
-  const handleDownloadCSV = () => {
-    // Direct secure browser redirect to trigger our Express attachment download
-    window.location.href = "http://localhost:5000/api/dashboard/reports/csv";
+  const handleDownloadCSV = async () => {
+    try {
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const response = await fetch(`${apiUrl}/dashboard/reports/csv`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to download report: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transitops_report.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Could not download CSV. Please verify authentication.");
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    // @ts-expect-error - jspdf/dist/jspdf.es.min.js has no declaration file
+    const jsPDF = (await import("jspdf/dist/jspdf.es.min.js")).default;
+    const autoTable = (await import("jspdf-autotable")).default;
+
+    const doc = new jsPDF();
+
+    // 1. Title Header Block
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text("TransitOps", 14, 20);
+
+    doc.setFontSize(11);
+    doc.setTextColor(100, 116, 139); // slate-500
+    doc.text("Smart Transport Operations • Fleet Analytics Ledger", 14, 26);
+
+    // Metadata lines
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184); // slate-400
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 34);
+    doc.text(
+      `Exported By: ${user?.name || "Anonymous"} (${user?.role || "FINANCIAL_ANALYST"})`,
+      14,
+      39,
+    );
+
+    doc.setDrawColor(226, 232, 240); // slate-200 line separator
+    doc.line(14, 43, 196, 43);
+
+    // 2. High-level Summary Section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Financial Summary Indices", 14, 52);
+
+    autoTable(doc, {
+      startY: 56,
+      head: [["Performance Indicator", "Current Outlay Value ($)"]],
+      body: [
+        [
+          "Total Fleet Revenue Stream",
+          `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        ],
+        [
+          "Total Operational Costs (Fuel & Repairs)",
+          `$${totalCosts.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        ],
+        [
+          "Net Consolidated Profitability",
+          `$${totalProfitability.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        ],
+      ],
+      theme: "striped",
+      headStyles: { fillColor: [79, 70, 229] }, // Premium Indigo fill
+      styles: { font: "helvetica", fontSize: 9, cellPadding: 3.5 },
+    });
+
+    // 3. Vehicles detailed ledger break-up
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(15, 23, 42);
+    doc.text(
+      "Vehicle Return on Investment (ROI) Ledger",
+      14,
+      (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+        .finalY + 12,
+    );
+
+    const vehicleRows = reports.map((r) => [
+      r.registrationNumber,
+      r.name,
+      `$${Number(r.revenue).toLocaleString()}`,
+      `$${Number(r.fuelCost).toLocaleString()}`,
+      `$${Number(r.maintenanceCost).toLocaleString()}`,
+      `$${Number(r.totalOperationalCost).toLocaleString()}`,
+      `${Number(r.roi).toFixed(1)}%`,
+    ]);
+
+    autoTable(doc, {
+      startY:
+        (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable
+          .finalY + 16,
+      head: [
+        [
+          "Reg No",
+          "Model Name",
+          "Revenue",
+          "Fuel Costs",
+          "Maint. Costs",
+          "Total Cost",
+          "ROI",
+        ],
+      ],
+      body: vehicleRows,
+      theme: "grid",
+      headStyles: { fillColor: [15, 23, 42] }, // Classic Dark Slate table header
+      styles: { font: "helvetica", fontSize: 8.5, cellPadding: 3 },
+      columnStyles: {
+        6: { fontStyle: "bold", textColor: [16, 185, 129] }, // Color code the ROI percentage in green
+      },
+    });
+
+    // 4. Footer Section
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.text(`Page ${i} of ${pageCount}`, 196, 285, { align: "right" });
+      doc.text("Confidential - TransitOps Smart Analytics Platform", 14, 285);
+    }
+
+    // Save and download the document
+    doc.save(
+      `TransitOps_Performance_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
+    );
   };
 
   // Cumulative totals
@@ -35,27 +184,50 @@ export default function AnalyticsPage() {
             Asset Profitability & Resource Analytics
           </p>
         </div>
-        <button
-          onClick={handleDownloadCSV}
-          disabled={isLoading || reports.length === 0}
-          className="h-10 px-5 bg-primary hover:bg-primary/95 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/10 transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleDownloadCSV}
+            disabled={isLoading || reports.length === 0}
+            className="h-10 px-5 bg-white/50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
-          Export CSV Spreadsheet
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Export CSV Spreadsheet
+          </button>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isLoading || reports.length === 0}
+            className="h-10 px-5 bg-primary hover:bg-primary/95 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl shadow-lg shadow-primary/10 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Export Tabular PDF
+          </button>
+        </div>
       </div>
 
       {/* Main KPI summary panel */}
