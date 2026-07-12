@@ -1,17 +1,7 @@
 import { useAuthStore } from "@/store/auth";
 
 const getApiUrl = (): string => {
-  const g =
-    typeof globalThis !== "undefined"
-      ? (globalThis as unknown as {
-          process?: { env?: { NEXT_PUBLIC_API_URL?: string } };
-        })
-      : null;
-  const envUrl = g?.process?.env?.NEXT_PUBLIC_API_URL;
-  if (envUrl) {
-    return envUrl;
-  }
-  return "http://localhost:5000/api";
+  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 };
 
 export async function apiFetch<T>(
